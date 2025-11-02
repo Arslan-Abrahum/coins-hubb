@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+.tiktok {
+  position: relative;
+  background: linear-gradient( to bottom right,
+    #1a1a1a,
+    #2b2b2b, 
+    #0f0f0f );
+}
+
+.tiktok::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('./assets/Untitled_design-removebg-preview.png');
+  background-position: right;
+  background-size: 50% 90%;
+  background-repeat: no-repeat;
+  opacity: 0.05;
+  top: 0;
+  right: 0;
+  filter: brightness(1.8);
+  pointer-events: none;
+  transform: rotate(7deg);
+}
