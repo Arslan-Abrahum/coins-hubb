@@ -129,10 +129,10 @@ function App() {
               <span className="text-gray-400 text-sm font-medium">Coins</span>
             </div>
 
-            <div className="flex justify-between items-center w-full mb-4 border-b-[1px] border-gray-500 pb-4">
-              <div className="flex items-center gap-2">
-                <img className="h-8 w-8" src={Coin} alt="coins" />
-                <span className="text-white text-4xl font-bold">
+            <div className="flex justify-between items-center w-full mb-4 border-b-[1px] border-gray-700 pb-4">
+              <div className="flex items-center gap-1">
+                <img className="h-7 w-7" src={Coin} alt="coins" />
+                <span className="text-white text-3xl font-bold">
                   {totalCoins}
                 </span>
               </div>
