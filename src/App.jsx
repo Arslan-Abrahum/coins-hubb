@@ -144,7 +144,8 @@ function App() {
               <div>
                 <p className="text-gray-400 text-sm mb-1">Estimated balance</p>
                 <h4 className="text-white text-xl font-semibold flex items-end">
-                  <p className="text-[15px]">USD</p> {(totalCoins / 100).toFixed(2)}
+                  <p className="text-[15px]">USD</p>0.00
+                  {/* {(totalCoins / 100).toFixed(2)} */}
                 </h4>
               </div>
               <button className="text-gray-400 text-sm font-medium">
