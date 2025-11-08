@@ -15,13 +15,14 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState("");
 
+  console.log(currentPackage);
+  
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         try {
-          console.log("🔑 Attempting anonymous sign-in...");
           await signInAnonymously(auth);
-          console.log("✅ Anonymous sign-in successful");
         } catch (authError) {
           console.error("❌ Auth error:", authError);
         }
@@ -79,7 +80,7 @@ function App() {
     return () => unsub();
   }, [authLoading]);
 
-  const displayTotalCoins = currentPackage?.totalPrice || currentPackage?.price || 0;
+  const displayTotalCoins = currentPackage?.price || 0;
   const displayUsername = currentPackage?.username || "User";
 
   if (authLoading || loading) {
