@@ -18,18 +18,15 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // Try to sign in anonymously
         try {
           console.log("🔑 Attempting anonymous sign-in...");
           await signInAnonymously(auth);
           console.log("✅ Anonymous sign-in successful");
         } catch (authError) {
           console.error("❌ Auth error:", authError);
-          // Don't set error - we'll still try to load packages with public read access
-          console.log("ℹ️ Continuing without authentication (using public read access)");
         }
       } else {
-        console.log("✅ User authenticated:", user.uid);
+        console.log("✅ User authenticated:");
       }
       setAuthLoading(false);
     });
@@ -40,10 +37,6 @@ function App() {
   useEffect(() => {
     if (authLoading) return;
     
-    // Since this is a separate app, we'll query all active packages
-    // and show the most recently updated one
-    console.log("🔍 Querying for active packages...");
-    
     const packagesQuery = query(
       collection(db, "packages"),
       where("status", "==", "active")
@@ -53,7 +46,6 @@ function App() {
       packagesQuery,
       (snapshot) => {
         if (!snapshot.empty) {
-          // Get all packages and sort by updatedAt to find the most recent
           const docs = snapshot.docs
             .map(doc => ({
               id: doc.id,
@@ -64,19 +56,13 @@ function App() {
             .sort((a, b) => {
               const aTime = a.updatedAt?.getTime?.() || 0;
               const bTime = b.updatedAt?.getTime?.() || 0;
-              return bTime - aTime; // Most recent first
+              return bTime - aTime; 
             });
           
-          const packageData = docs[0]; // Get the most recently updated package
+          const packageData = docs[0]; 
           
           setCurrentPackage(packageData);
-          console.log("✅ Most recent package loaded:", packageData);
-          console.log("📊 Username:", packageData.username);
-          console.log("💰 Current Price:", packageData.price);
-          console.log("💎 Total Price:", packageData.totalPrice);
-          console.log(`📦 Found ${docs.length} total active package(s)`);
         } else {
-          console.log("ℹ️ No active packages found in database");
           setCurrentPackage(null);
         }
         setLoading(false);
@@ -93,7 +79,6 @@ function App() {
     return () => unsub();
   }, [authLoading]);
 
-  // Use totalPrice (cumulative) if available, otherwise fall back to price (current purchase)
   const displayTotalCoins = currentPackage?.totalPrice || currentPackage?.price || 0;
   const displayUsername = currentPackage?.username || "User";
 
