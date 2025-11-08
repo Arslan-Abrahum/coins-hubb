@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db, auth } from "./firebase";
-import { collection, onSnapshot, query, where, orderBy, doc, getDoc } from "firebase/firestore";
+import { collection, onSnapshot, query, where, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import Coin from "./assets/imgi_1_coin-removebg-preview.png";
 import { HelpCircle, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
@@ -14,6 +14,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState("");
+  const [clearing, setClearing] = useState(false);
 
   console.log(currentPackage);
   
@@ -80,7 +81,26 @@ function App() {
     return () => unsub();
   }, [authLoading]);
 
-  const displayTotalCoins = currentPackage?.price || 0;
+  const handleClearCoins = async () => {
+    if (!currentPackage?.id) return;
+    
+    setClearing(true);
+    try {
+      const packageRef = doc(db, "packages", currentPackage.id);
+      await updateDoc(packageRef, {
+        totalPrice: 0,
+        updatedAt: new Date()
+      });
+      console.log("✅ Coins cleared successfully");
+    } catch (error) {
+      console.error("❌ Error clearing coins:", error);
+      setError("Failed to clear coins. Please try again.");
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  const displayTotalCoins = currentPackage?.totalPrice;
   const displayUsername = currentPackage?.username || "User";
 
   if (authLoading || loading) {
@@ -175,8 +195,12 @@ function App() {
               <p className="text-gray-500 text-sm mb-2">
                 Bonus Coins and animated Gift
               </p>
-              <button className="text-[#F6506A] text-sm font-semibold flex items-center gap-1">
-                Get <ArrowRight size={18} />
+              <button 
+                onClick={handleClearCoins}
+                disabled={clearing}
+                className="text-[#F6506A] text-sm font-semibold flex items-center gap-1 disabled:opacity-50"
+              >
+                {clearing ? "Getting..." : "Get Coins"} <ArrowRight size={18} />
               </button>
             </div>
 
