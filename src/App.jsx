@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { db, auth } from "./firebase";
-import { collection, onSnapshot, query, where, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
+import { collection, onSnapshot, query, where, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import Coin from "./assets/imgi_1_coin-removebg-preview.png";
 import { HelpCircle, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
@@ -8,16 +8,12 @@ import Gift from './assets/gift-removebg-preview.png'
 import { CgArrowsExchange } from "react-icons/cg";
 import { LiaDollarSignSolid } from "react-icons/lia";
 
-
 function App() {
   const [currentPackage, setCurrentPackage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [error, setError] = useState("");
   const [clearing, setClearing] = useState(false);
-
-  console.log(currentPackage);
-  
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -32,7 +28,6 @@ function App() {
       }
       setAuthLoading(false);
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -60,8 +55,7 @@ function App() {
               const bTime = b.updatedAt?.getTime?.() || 0;
               return bTime - aTime; 
             });
-          
-          const packageData = docs[0]; 
+          const packageData = docs[0];
           
           setCurrentPackage(packageData);
         } else {
@@ -72,7 +66,6 @@ function App() {
       },
       (error) => {
         console.error("❌ Firestore error:", error);
-        console.error("Error details:", error.message);
         setError("Failed to load packages. Please check Firestore rules.");
         setLoading(false);
       }
@@ -82,25 +75,37 @@ function App() {
   }, [authLoading]);
 
   const handleClearCoins = async () => {
-    if (!currentPackage?.id) return;
-    
+    if (!currentPackage?.id) {
+      console.error("❌ No package ID found");
+      return;
+    }
     setClearing(true);
+    setError(""); 
+    
     try {
       const packageRef = doc(db, "packages", currentPackage.id);
+      
       await updateDoc(packageRef, {
         totalPrice: 0,
         updatedAt: new Date()
       });
-      console.log("✅ Coins cleared successfully");
+      
+      setCurrentPackage(prev => ({
+        ...prev,
+        totalPrice: 0,
+        price: 0,
+        updatedAt: new Date()
+      }));
+      
     } catch (error) {
       console.error("❌ Error clearing coins:", error);
-      setError("Failed to clear coins. Please try again.");
+      setError(`Failed to clear coins: ${error.message}`);
     } finally {
       setClearing(false);
     }
   };
 
-  const displayTotalCoins = currentPackage?.totalPrice;
+  const displayTotalCoins = currentPackage?.totalPrice ?? 0;
   const displayUsername = currentPackage?.username || "User";
 
   if (authLoading || loading) {
@@ -149,6 +154,12 @@ function App() {
           </h1>
         </div>
         
+        {error && (
+          <div className="mx-5 mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+        
         <div className="mx-5 mb-5 rounded-2xl px-5 py-8 shadow-lg tiktok">
           <div className="flex items-center justify-between mb-2 ">
             <span className="text-gray-400 text-sm font-medium">Coins</span>
@@ -170,7 +181,6 @@ function App() {
               <p className="text-gray-400 text-sm mb-1">Estimated balance</p>
               <h4 className="text-white text-xl font-semibold flex items-end">
                 <p className="text-[15px]">USD</p>0.00
-                {/* {(displayTotalCoins / 100).toFixed(2)} */}
               </h4>
             </div>
             <button className="text-gray-400 text-sm font-medium">
@@ -198,9 +208,9 @@ function App() {
               <button 
                 onClick={handleClearCoins}
                 disabled={clearing}
-                className="text-[#F6506A] text-sm font-semibold flex items-center gap-1 disabled:opacity-50"
+                className="text-[#F6506A] text-sm font-semibold flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {clearing ? "Getting..." : "Get Coins"} <ArrowRight size={18} />
+                {clearing ? "Clearing..." : "Get Coins"} <ArrowRight size={18} />
               </button>
             </div>
 
